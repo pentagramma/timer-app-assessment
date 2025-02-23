@@ -14,8 +14,9 @@ export default function AddTimerScreen() {
 
   const saveTimer = async () => {
     if (!name || !duration || !category) return;
+    const timestamp = Date.now();
     const newTimer = {
-      name: `\${name}_\${Date.now()}`, // Ensure unique name
+      name: name, // Concatenate strings instead of using template literals
       duration: parseInt(duration),
       remaining: parseInt(duration),
       category,

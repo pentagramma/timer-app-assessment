@@ -10,6 +10,7 @@ type Timer = {
   remaining: number;
   category: string;
   status: "Pending" | "Running" | "Paused" | "Completed";
+  halfwayAlert: boolean;
 };
 
 export default function HomeScreen() {
@@ -201,7 +202,7 @@ export default function HomeScreen() {
   const deleteTimer = (timerName: string, category: string) => {
     Alert.alert(
       "Delete Timer",
-      `Are you sure you want to delete "\${timerName}"?`,
+      "Are you sure you want to delete \"" + timerName + "\"?",
       [
         { text: "Cancel", style: "cancel" },
         { 
