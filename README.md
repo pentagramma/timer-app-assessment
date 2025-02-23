@@ -12,7 +12,7 @@ A versatile timer application built with React Native and Expo, featuring custom
 - Halfway alerts for timers
 - Bulk actions for timers within categories
 - Timer history tracking
-- Export timer data as JSON
+- Export timer data as .txt
 
 ## Installation
 
