@@ -258,7 +258,7 @@ export default function HomeScreen() {
           onValueChange={toggleTheme}
         />
       </View>
-      <Button title="Add s" onPress={() => router.push("/add-timer")} />
+      <Button title="Add Timer" onPress={() => router.push("/add-timer")} />
       <Button title="View History" onPress={() => router.push("/history")} />
       {categories.map((category) => (
         <View key={category} style={styles.categoryContainer}>

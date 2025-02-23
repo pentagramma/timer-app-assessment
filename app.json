@@ -14,13 +14,15 @@
       "infoPlist": {
         "UIFileSharingEnabled": true
       }
-
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff",
-        "permissions": ["WRITE_EXTERNAL_STORAGE", "READ_EXTERNAL_STORAGE"]
+        "permissions": [
+          "WRITE_EXTERNAL_STORAGE",
+          "READ_EXTERNAL_STORAGE"
+        ]
       },
       "package": "com.himanshu1611.MyFirstApp"
     },
@@ -43,6 +45,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "7df9d658-54cc-49fb-8f21-9e001e3ac166"
+      }
     }
   }
 }
