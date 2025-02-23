@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, Switch, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "./theme-context";
 
 export default function AddTimerScreen() {
   const router = useRouter();
+  const { theme } = useTheme(); // Use the theme
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
   const [category, setCategory] = useState("");
@@ -26,38 +28,45 @@ export default function AddTimerScreen() {
     router.push("/");
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 10,
+      backgroundColor: theme === 'light' ? '#FFFFFF' : '#121212',
+    },
+    text: {
+      color: theme === 'light' ? '#000000' : '#FFFFFF',
+      marginBottom: 5,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: theme === 'light' ? "#ccc" : "#444",
+      padding: 5,
+      marginBottom: 10,
+      color: theme === 'light' ? '#000000' : '#FFFFFF',
+      backgroundColor: theme === 'light' ? '#FFFFFF' : '#2a2a2a',
+    },
+    switchContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+  });
+
   return (
     <View style={styles.container}>
-      <Text>Timer Name:</Text>
+      <Text style={styles.text}>Timer Name:</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
-      <Text>Duration (seconds):</Text>
+      <Text style={styles.text}>Duration (seconds):</Text>
       <TextInput style={styles.input} value={duration} onChangeText={setDuration} keyboardType="numeric" />
-      <Text>Category:</Text>
+      <Text style={styles.text}>Category:</Text>
       <TextInput style={styles.input} value={category} onChangeText={setCategory} />
       <View style={styles.switchContainer}>
-        <Text>Halfway Alert:</Text>
+        <Text style={styles.text}>Halfway Alert:</Text>
         <Switch value={halfwayAlert} onValueChange={setHalfwayAlert} />
       </View>
       <Button title="Save Timer" onPress={saveTimer} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 5,
-    marginBottom: 10,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-});

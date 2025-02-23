@@ -10,12 +10,17 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.himanshu1611.MyFirstApp"
+      "bundleIdentifier": "com.himanshu1611.MyFirstApp",
+      "infoPlist": {
+        "UIFileSharingEnabled": true
+      }
+
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "permissions": ["WRITE_EXTERNAL_STORAGE", "READ_EXTERNAL_STORAGE"]
       },
       "package": "com.himanshu1611.MyFirstApp"
     },

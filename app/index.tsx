@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, Button, ScrollView, StyleSheet, Modal, Alert } from "react-native";
+import { View, Text, Button, ScrollView, StyleSheet, Modal, Alert, Switch } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "./theme-context";
 
 type Timer = {
   name: string;
@@ -13,11 +14,82 @@ type Timer = {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [timers, setTimers] = useState<Timer[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [completedTimer, setCompletedTimer] = useState<Timer | null>(null);
   const [editingTimer, setEditingTimer] = useState<string | null>(null);
+  const [halfwayTimer, setHalfwayTimer] = useState<Timer | null>(null);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 10,
+      backgroundColor: theme === 'light' ? '#FFFFFF' : '#121212',
+    },
+    text: {
+      color: theme === 'light' ? '#000000' : '#FFFFFF',
+    },
+    categoryContainer: {
+      marginVertical: 10,
+    },
+    bulkActionContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginVertical: 5,
+    },
+    timerContainer: {
+      backgroundColor: theme === 'light' ? "#f0f0f0" : "#2a2a2a",
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 5,
+    },
+    buttonContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+    },
+    progressBar: {
+      height: 10,
+      backgroundColor: theme === 'light' ? "#e0e0e0" : "#4a4a4a",
+      borderRadius: 5,
+      marginVertical: 5,
+    },
+    progress: {
+      height: "100%",
+      backgroundColor: "green",
+      borderRadius: 5,
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+      backgroundColor: theme === 'light' ? "white" : "#2a2a2a",
+      padding: 20,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    modalText: {
+      fontSize: 18,
+      marginBottom: 10,
+      color: theme === 'light' ? '#000000' : '#FFFFFF',
+    },
+    editDeleteContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+    },
+    headerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+  });
 
   useEffect(() => {
     loadTimers();
@@ -41,11 +113,18 @@ export default function HomeScreen() {
       prevTimers.map(timer => {
         if (timer.status === "Running" && timer.remaining > 0) {
           const newRemaining = timer.remaining - 1;
+          
+          // Trigger halfway alert if enabled
+          if (timer.halfwayAlert && newRemaining === Math.floor(timer.duration / 2)) {
+            setHalfwayTimer(timer);
+          }
+  
           if (newRemaining === 0) {
             setCompletedTimer(timer);
             saveCompletedTimer(timer);
             return { ...timer, remaining: 0, status: "Completed" };
           }
+  
           return { ...timer, remaining: newRemaining };
         }
         return timer;
@@ -172,7 +251,14 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Button title="Add Timer" onPress={() => router.push("/add-timer")}  />
+      <View style={styles.headerContainer}>
+      <Text style={styles.text}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</Text>
+        <Switch
+          value={theme === 'dark'}
+          onValueChange={toggleTheme}
+        />
+      </View>
+      <Button title="Add s" onPress={() => router.push("/add-timer")} />
       <Button title="View History" onPress={() => router.push("/history")} />
       {categories.map((category) => (
         <View key={category} style={styles.categoryContainer}>
@@ -195,22 +281,22 @@ export default function HomeScreen() {
             timers
               .filter((timer) => timer.category === category)
               .map((timer, index) => (
-                <View key={index} style={styles.timerContainer}>
-                  <Text>{timer.name}</Text>
-                  <Text>Remaining Time: {timer.remaining}s</Text>
-                  <Text>Status: {timer.status}</Text>
+                <View key={`\${category}-\${timer.name}-\${index}`} style={styles.timerContainer}>
+                  <Text style={styles.text}>{timer.name}</Text>
+                  <Text style={styles.text}>Remaining Time: {timer.remaining}s</Text>
+                  <Text style={styles.text}>Status: {timer.status}</Text>
                   <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progress,
-                      {
-                        width: `\${Math.max(0, Math.min(100, (timer.remaining / timer.duration) * 100))}%`,
-                      },
-                    ]}
-                  />
+                    <View
+                      style={[
+                        styles.progress,
+                        {
+                          width: `\${Math.max(0, Math.min(100, (timer.remaining / timer.duration) * 100))}%`,
+                        },
+                      ]}
+                    />
                   </View>
                   <View style={styles.buttonContainer}>
-                  <Button
+                    <Button
                       title="Start"
                       onPress={() => startTimer(timer.name, timer.category)}
                       disabled={timer.status === "Running"}
@@ -221,7 +307,6 @@ export default function HomeScreen() {
                       disabled={timer.status !== "Running"}
                     />
                     <Button title="Reset" onPress={() => resetTimer(timer.name, timer.category)} />
-
                   </View>
                   <View style={styles.editDeleteContainer}>
                     <Button 
@@ -255,64 +340,20 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+      <Modal
+        visible={!!halfwayTimer}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Alert: {halfwayTimer?.name} is halfway done!
+            </Text>
+            <Button title="OK" onPress={() => setHalfwayTimer(null)} />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  categoryContainer: {
-    marginVertical: 10,
-  },
-  bulkActionContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 5,
-  },
-  timerContainer: {
-    backgroundColor: "#f0f0f0",
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  progressBar: {
-    height: 10,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 5,
-    marginVertical: 5,
-  },
-  progress: {
-    height: "100%",
-    backgroundColor: "green",
-    borderRadius: 5,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  editDeleteContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-});
